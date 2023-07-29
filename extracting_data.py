@@ -37,9 +37,9 @@ def compile_dictionary(data):
     start = data.find('<REUTERS TOPICS="') + len('<REUTERS TOPICS="')
     end = data.find('" LEWISSPLIT=')
     data_dict['REUTERS TOPICS'] = data[start:end]
-    start = data.find('<LEWISSPLIT="') + len('<LEWISSPLIT="')
+    start = data.find('LEWISSPLIT="') + len('LEWISSPLIT="')
     end = data.find('" CGISPLIT=')
-    data_dict['LEWISSPLIT='] = data[start:end]
+    data_dict['LEWISSPLIT'] = data[start:end]
 
     soup = BeautifulSoup(data, 'xml')
 

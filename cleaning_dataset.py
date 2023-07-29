@@ -1,4 +1,3 @@
-import io
 import nltk
 nltk.download('punkt')
 from nltk.corpus import stopwords
@@ -44,7 +43,6 @@ def stemming(dataframe):
 
         body_text = dataframe["BODY"][i]
         body_words = word_tokenize(body_text)
-        print(body_words)
         for t in title_words:
             new_title = new_title + ' ' + ps.stem(t)
         for b in body_words:

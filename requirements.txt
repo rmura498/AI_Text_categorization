@@ -1,5 +1,7 @@
-nltk
+nltk~=3.8.1
 numpy
-bs4
+bs4~=0.0.1
 lxml
-pandas
+pandas~=2.0.3
+beautifulsoup4~=4.12.2
+scikit-learn~=1.3.0
