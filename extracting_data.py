@@ -47,7 +47,9 @@ def compile_dictionary(data):
     # If empty, the default value remains unchanged
     try:
         if soup.TOPICS.contents:
-            data_dict['TOPICS'] = soup.TOPICS.D.contents[0]
+            data_dict['TOPICS'] = soup.TOPICS.contents[:]
+            data_dict['TOPICS'] = [str(data).replace('<D>', '') for data in data_dict['TOPICS']]
+            data_dict['TOPICS'] = [str(data).replace('</D>', '') for data in data_dict['TOPICS']]
 
         if soup.TITLE.contents:
             data_dict['TITLE'] = soup.TITLE.contents[0]
@@ -59,5 +61,3 @@ def compile_dictionary(data):
         pass
 
     return data_dict
-
-

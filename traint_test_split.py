@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
 import pickle
+from sklearn.preprocessing import MultiLabelBinarizer
 
 
-def train_test_split():
+def train_test_split(labels):
     X_train = []
     y_train = []
     X_test = []
@@ -22,12 +23,15 @@ def train_test_split():
                                                                                 len(y_train),
                                                                                 len(X_test),
                                                                                 len(y_test)))
-    print(X_train[0])
-    print(y_train[0])
+
     X_train = np.array(X_train)
     X_test = np.array(X_test)
-    y_train = np.array(y_train)
-    y_test = np.array(y_test)
+    y_train = np.array(y_train, dtype='object')
+    y_test = np.array(y_test, dtype='object')
+
+    mlb = MultiLabelBinarizer(classes=labels)
+    y_train = mlb.fit_transform(y_train)
+    y_test = mlb.fit_transform(y_test)
 
     with open('X_train.pkl', 'wb') as f:
         pickle.dump(X_train, f)

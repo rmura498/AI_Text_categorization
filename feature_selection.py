@@ -1,7 +1,10 @@
 from sklearn.feature_selection import mutual_info_classif
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
 import pandas as pd
+import pickle
+import numpy as np
 from operator import itemgetter
 
 number_of_features = 800
@@ -11,20 +14,27 @@ def retrieving_most_discriminant_words(X_train, y_train):
     cv = CountVectorizer()
     X_vec = cv.fit_transform(X_train)
 
-    IG = dict(zip(cv.get_feature_names_out(),
-                  mutual_info_classif(X_vec, y_train, discrete_features=True, n_neighbors=3)))
+    # Compute mutual information for each label individually
+    mi_per_label = []
+    for label_idx in range(y_train.shape[1]):
+        mi = mutual_info_classif(X_vec, y_train[:, label_idx], discrete_features=True, n_neighbors=3)
+        mi_per_label.append(mi)
+
+    # Calculate the average mutual information across all labels
+    average_mi = np.mean(mi_per_label, axis=0)
+
+    IG = dict(zip(cv.get_feature_names_out(), average_mi))
     most_discriminant = dict(sorted(IG.items(), key=itemgetter(1), reverse=True)[:number_of_features])
-    print('Number of words to consider:', len(most_discriminant))
-    # print("The most discriminant words are " + str(most_discriminant))
-    most_discriminant_words = list(most_discriminant.keys())
+    print('Number of feature to consider:', len(most_discriminant))
+    most_discriminant_features = list(most_discriminant.keys())
+    with open('most_discriminant_features.pkl', 'wb') as f:
+        pickle.dump(most_discriminant_features, f)
+    return most_discriminant_features
 
-    return most_discriminant_words
 
-
-def computing_tfidf(most_discriminant_words, X):
-
+def computing_tfidf(most_discriminant_features, X):
     print("shape ", X.shape)
-    cv = TfidfVectorizer(max_features=number_of_features, vocabulary=most_discriminant_words)
+    cv = TfidfVectorizer(max_features=number_of_features, vocabulary=most_discriminant_features)
     X_vec = cv.fit_transform(X)
 
     tfidf_transformer = TfidfTransformer()

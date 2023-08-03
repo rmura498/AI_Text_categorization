@@ -21,9 +21,10 @@ if not os.path.exists('dataframe.pkl'):
     dataset_dicts = [compile_dictionary(data) for data in dataset]
     dataset_dicts = [data for data in dataset_dicts if data['TOPICS'] != 'none']  # or data['REUTERS TOPICS'] == 'YES']
 
-    # maintaining the rows of the 5 most common label
+    # maintaining the rows of the most common label
     labels = [data["TOPICS"] for data in dataset_dicts]
-    common_labels = Counter(labels)
+    flat_labels = [item for sublist in labels for item in sublist]
+    common_labels = Counter(flat_labels)
     most_common_labels = common_labels.most_common(number_of_classes)
     print(most_common_labels)
     most_common_labels = [most_common_labels[i][0] for i in range(number_of_classes)]
@@ -33,7 +34,7 @@ if not os.path.exists('dataframe.pkl'):
 
     with open('labels.pkl', 'wb') as f:
         pickle.dump(most_common_labels, f)
-    dataset_dicts = [data for data in dataset_dicts if data['TOPICS'] in most_common_labels]
+    dataset_dicts = [data for data in dataset_dicts if data['TOPICS'][0] in most_common_labels]
 
     for data in dataset_dicts:
         if data['BODY'] == '':
@@ -44,13 +45,27 @@ if not os.path.exists('dataframe.pkl'):
     df = stemming(df)
     df.to_pickle('dataframe.pkl')
 
-X_train, X_test, y_train, y_test = train_test_split()
-most_discriminant_words = retrieving_most_discriminant_words(X_train, y_train)
-X_train = computing_tfidf(most_discriminant_words, X_train)
-X_test = computing_tfidf(most_discriminant_words, X_test)
-
 with open('labels.pkl', 'rb') as f:
     labels = pickle.load(f)
+
+if not os.path.exists('most_discriminant_features.pkl'):
+    X_train, X_test, y_train, y_test = train_test_split(labels)
+    most_discriminant_features = retrieving_most_discriminant_words(X_train, y_train)
+
+with open('most_discriminant_features.pkl', 'rb') as f:
+    most_discriminant_features = pickle.load(f)
+with open('X_train.pkl', 'rb') as f:
+    X_train = pickle.load(f)
+with open('X_test.pkl', 'rb') as f:
+    X_test = pickle.load(f)
+with open('y_test.pkl', 'rb') as f:
+    y_test = pickle.load(f)
+with open('y_train.pkl', 'rb') as f:
+    y_train = pickle.load(f)
+print('The most discriminant features are:', most_discriminant_features)
+
+X_train = computing_tfidf(most_discriminant_features, X_train)
+X_test = computing_tfidf(most_discriminant_features, X_test)
 
 classify(X_train, y_train, X_test, y_test)
 
